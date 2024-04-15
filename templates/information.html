@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Helpful AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Helpful AI</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/chatbot">Chatbot</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contact</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="/developer">Developer</a>
+                </li> -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/information">Information</a>
+                </li>
+            </ul>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="mt-5">Patient Information</h1>
+    
+    <!-- Navigation buttons -->
+    <div class="mb-3">
+        <a href="/information?action=create" class="btn btn-primary">Create New Patient</a>
+        <a href="/information?action=list" class="btn btn-secondary">List Patients</a>
+    </div>
+
+    {% if action == "create" %}
+    <!-- Form to create a new patient -->
+    <h2>Create New Patient</h2>
+    <form action="/create" method="POST" class="mt-3">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" id="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="date_of_birth" class="form-label">Date of Birth</label>
+            <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" required>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select name="gender" class="form-select" id="gender" required>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="O">Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="medical_conditions" class="form-label">Medical Conditions</label>
+            <input type="text" name="medical_conditions" class="form-control" id="medical_conditions">
+        </div>
+        <div class="mb-3">
+            <label for="medications" class="form-label">Medications</label>
+            <input type="text" name="medications" class="form-control" id="medications">
+        </div>
+        <div class="mb-3">
+            <label for="allergies" class="form-label">Allergies</label>
+            <input type="text" name="allergies" class="form-control" id="allergies">
+        </div>
+        <div class="mb-3">
+            <label for="last_appointment_date" class="form-label">Last Appointment Date</label>
+            <input type="date" name="last_appointment_date" class="form-control" id="last_appointment_date">
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+
+    {% elif action == "list" %}
+    <!-- List of patients -->
+    <h2>List of Patients</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Date of Birth</th>
+                <th>Gender</th>
+                <th>Medical Conditions</th>
+                <th>Medications</th>
+                <th>Allergies</th>
+                <th>Last Appointment Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient._id }}</td>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.date_of_birth.strftime('%Y-%m-%d') }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.medical_conditions }}</td>
+                <td>{{ patient.medications }}</td>
+                <td>{{ patient.allergies }}</td>
+                <td>{{ patient.last_appointment_date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="/edit/{{ patient._id }}" class="btn btn-sm btn-secondary">Edit</a>
+                    <a href="/delete/{{ patient._id }}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% elif action == "edit" %}
+    <!-- Form to edit an existing patient -->
+    <h2>Edit Patient</h2>
+    <form action="/edit/{{ patient._id }}" method="POST" class="mt-3">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" id="name" value="{{ patient.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="date_of_birth" class="form-label">Date of Birth</label>
+            <input type="date" name="date_of_birth" class="form-control" id="date_of_birth" value="{{ patient.date_of_birth.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select name="gender" class="form-select" id="gender" required>
+                <option value="M" {% if patient.gender == 'M' %}selected{% endif %}>Male</option>
+                <option value="F" {% if patient.gender == 'F' %}selected{% endif %}>Female</option>
+                <option value="O" {% if patient.gender == 'O' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="medical_conditions" class="form-label">Medical Conditions</label>
+            <input type="text" name="medical_conditions" class="form-control" id="medical_conditions" value="{{ patient.medical_conditions }}">
+        </div>
+        <div class="mb-3">
+            <label for="medications" class="form-label">Medications</label>
+            <input type="text" name="medications" class="form-control" id="medications" value="{{ patient.medications }}">
+        </div>
+        <div class="mb-3">
+            <label for="allergies" class="form-label">Allergies</label>
+            <input type="text" name="allergies" class="form-control" id="allergies" value="{{ patient.allergies }}">
+        </div>
+        <div class="mb-3">
+            <label for="last_appointment_date" class="form-label">Last Appointment Date</label>
+            <input type="date" name="last_appointment_date" class="form-control" id="last_appointment_date" value="{{ patient.last_appointment_date.strftime('%Y-%m-%d') }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+    
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+</body>
+</html>
