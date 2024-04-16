@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = 'final'
 
 # Configure MongoDB
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/Final_project.medical_records'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/Final_project'
 
 # Initialize PyMongo with the app
 mongo = PyMongo(app)
@@ -99,20 +99,45 @@ def contact():
 # about view funtion and path
 @app.route('/information')
 def information():
-    return render_template("information.html")
+    action = request.args.get('action')
+    if action == 'create':
+        return render_template('information.html', action='create')
+    elif action == 'list':
+        patients = mongo.db.medical_records.find()
+        return render_template('information.html', action='list', patients=patients)
+    elif action == 'search':
+        return render_template('information.html', action='search')
+    else:
+        return render_template("information.html")
+
+@app.route('/search', methods=['GET'])
+def search_patient():
+    # Get the search query from the URL parameters
+    search_query = request.args.get('query')
+    
+    # Search for patients in the medical_records collection
+    # Query the collection based on the search query in the 'name' field
+    results = mongo.db.medical_records.find({
+        'name': {'$regex': search_query, '$options': 'i'}
+    })
+    
+    # Render the information.html template with the search results
+    # Pass 'list' as the action to indicate we want to display the list of patients
+    return render_template('information.html', action='list', patients=results)
+
 
 # Create a new patient
 @app.route('/create', methods=['GET', 'POST'])
 def create_patient():
     if request.method == 'POST':
         # Get form data
-        name = request.form['name']
-        date_of_birth = request.form['date_of_birth']
-        gender = request.form['gender']
-        medical_conditions = request.form['medical_conditions']
-        medications = request.form['medications']
-        allergies = request.form['allergies']
-        last_appointment_date = request.form['last_appointment_date']
+        name = request.form.get('name')
+        date_of_birth = request.form.get('date_of_birth')
+        gender = request.form.get('gender')
+        medical_conditions = request.form.get('medical_conditions')
+        medications = request.form.get('medications')
+        allergies = request.form.get('allergies')
+        last_appointment_date = request.form.get('last_appointment_date')
         
         # Convert date_of_birth and last_appointment_date to datetime objects
         date_of_birth = datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
@@ -129,44 +154,37 @@ def create_patient():
             'last_appointment_date': last_appointment_date
         }
         
-        # Insert the new patient record into the database
-        mongo.db.patients.insert_one(new_patient)
+        # Insert the new patient record into the medical_records collection
+        mongo.db.medical_records.insert_one(new_patient)
         
         # Redirect to the patient list page
         flash('Patient added successfully.')
-        return redirect(url_for('list_patients'))
+        return redirect(url_for('information', action='list'))
     
     return render_template('create_patient.html')
-
-# List all patients
-@app.route('/patients')
-def list_patients():
-    # Query all patients from the database
-    patients = mongo.db.patients.find()
-    return render_template('list_patients.html', patients=patients)
 
 # Edit a patient
 @app.route('/edit/<patient_id>', methods=['GET', 'POST'])
 def edit_patient(patient_id):
     # Query the patient from the database
-    patient = mongo.db.patients.find_one({'_id': ObjectId(patient_id)})
+    patient = mongo.db.medical_records.find_one({'_id': ObjectId(patient_id)})
     
     if request.method == 'POST':
         # Get form data
-        name = request.form['name']
-        date_of_birth = request.form['date_of_birth']
-        gender = request.form['gender']
-        medical_conditions = request.form['medical_conditions']
-        medications = request.form['medications']
-        allergies = request.form['allergies']
-        last_appointment_date = request.form['last_appointment_date']
+        name = request.form.get('name')
+        date_of_birth = request.form.get('date_of_birth')
+        gender = request.form.get('gender')
+        medical_conditions = request.form.get('medical_conditions')
+        medications = request.form.get('medications')
+        allergies = request.form.get('allergies')
+        last_appointment_date = request.form.get('last_appointment_date')
         
         # Convert date_of_birth and last_appointment_date to datetime objects
         date_of_birth = datetime.datetime.strptime(date_of_birth, '%Y-%m-%d')
         last_appointment_date = datetime.datetime.strptime(last_appointment_date, '%Y-%m-%d')
         
         # Update the patient record
-        mongo.db.patients.update_one(
+        mongo.db.medical_records.update_one(
             {'_id': ObjectId(patient_id)},
             {'$set': {
                 'name': name,
@@ -181,19 +199,23 @@ def edit_patient(patient_id):
         
         # Redirect to the patient list page
         flash('Patient updated successfully.')
-        return redirect(url_for('list_patients'))
+        return redirect(url_for('information', action='list'))
     
+    # Convert dates for display in edit form
+    if patient:
+        patient['date_of_birth'] = patient['date_of_birth'].strftime('%Y-%m-%d')
+        patient['last_appointment_date'] = patient['last_appointment_date'].strftime('%Y-%m-%d')
     return render_template('edit_patient.html', patient=patient)
 
 # Delete a patient
 @app.route('/delete/<patient_id>')
 def delete_patient(patient_id):
-    # Delete the patient from the database
-    mongo.db.patients.delete_one({'_id': ObjectId(patient_id)})
+    # Delete the patient from the medical_records collection
+    mongo.db.medical_records.delete_one({'_id': ObjectId(patient_id)})
     
     # Redirect to the patient list page
     flash('Patient deleted successfully.')
-    return redirect(url_for('list_patients'))
+    return redirect(url_for('information', action='list'))
 
 if __name__ == '__main__':
     app.run(debug=True)
