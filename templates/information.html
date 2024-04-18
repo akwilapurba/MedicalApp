@@ -126,6 +126,17 @@
         </tbody>
     </table>
 
+    <!-- Pagination controls -->
+    <div class="pagination mt-3">
+        {% if current_page > 1 %}
+        <a href="/information?action=list&page={{ current_page - 1 }}" class="btn btn-secondary">Previous</a>
+        {% endif %}
+        Page {{ current_page }} of {{ total_pages }}
+        {% if current_page < total_pages %}
+        <a href="/information?action=list&page={{ current_page + 1 }}" class="btn btn-secondary">Next</a>
+        {% endif %}
+    </div>
+
     {% elif action == "edit" %}
     <!-- Form to edit an existing patient -->
     <h2>Edit Patient</h2>

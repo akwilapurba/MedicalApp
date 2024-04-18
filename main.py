@@ -100,11 +100,20 @@ def contact():
 @app.route('/information')
 def information():
     action = request.args.get('action')
+    page = int(request.args.get('page', 1))  # Get the current page number from the URL, default is 1
+    per_page = 50  # Number of patients per page
+
     if action == 'create':
         return render_template('information.html', action='create')
     elif action == 'list':
-        patients = mongo.db.medical_records.find()
-        return render_template('information.html', action='list', patients=patients)
+        # Calculate the total number of patients and the total number of pages
+        total_patients = mongo.db.medical_records.count_documents({})
+        total_pages = (total_patients + per_page - 1) // per_page
+
+        # Fetch patients according to the current page and limit results
+        patients = mongo.db.medical_records.find().skip((page - 1) * per_page).limit(per_page)
+        
+        return render_template('information.html', action='list', patients=patients, total_pages=total_pages, current_page=page)
     elif action == 'search':
         return render_template('information.html', action='search')
     else:
@@ -114,17 +123,29 @@ def information():
 def search_patient():
     # Get the search query from the URL parameters
     search_query = request.args.get('query')
-    
-    # Search for patients in the medical_records collection
+    page = int(request.args.get('page', 1))  # Get the current page number, default is 1
+
+    # Define the number of search results per page
+    per_page = 50
+
+    # Perform a case-insensitive search for patients in the medical_records collection
     # Query the collection based on the search query in the 'name' field
-    results = mongo.db.medical_records.find({
+    # Calculate the total number of search results
+    total_patients = mongo.db.medical_records.count_documents({
         'name': {'$regex': search_query, '$options': 'i'}
     })
-    
-    # Render the information.html template with the search results
-    # Pass 'list' as the action to indicate we want to display the list of patients
-    return render_template('information.html', action='list', patients=results)
 
+    # Calculate the total number of pages
+    total_pages = (total_patients + per_page - 1) // per_page
+
+    # Fetch search results according to the current page and limit results
+    results = mongo.db.medical_records.find({
+        'name': {'$regex': search_query, '$options': 'i'}
+    }).skip((page - 1) * per_page).limit(per_page)
+    
+    # Render the information.html template with the search results and pagination details
+    # Pass 'list' as the action to indicate we want to display the list of patients
+    return render_template('information.html', action='list', patients=results, total_pages=total_pages, current_page=page)
 
 # Create a new patient
 @app.route('/create', methods=['GET', 'POST'])
