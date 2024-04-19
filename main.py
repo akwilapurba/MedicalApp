@@ -91,11 +91,6 @@ def home():
 
     return render_template('chatbot.html')
 
-# contact view funtion and path
-@app.route('/about')
-def about():
-    return render_template("about.html")
-
 # about view funtion and path
 @app.route('/information')
 def information():
