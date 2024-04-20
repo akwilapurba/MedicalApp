@@ -226,7 +226,15 @@ def edit_patient(patient_id):
 # Delete a patient
 @app.route('/delete/<patient_id>')
 def delete_patient(patient_id):
-    # Delete the patient from the medical_records collection
+    # Query the patient from the database
+    patient = mongo.db.medical_records.find_one({'_id': ObjectId(patient_id)})
+    
+    # Render a confirmation page before deletion
+    return render_template('delete_confirmation.html', patient=patient)
+
+@app.route('/confirm_delete/<patient_id>', methods=['POST'])
+def confirm_delete_patient(patient_id):
+    ## Delete the patient from the medical_records collection
     mongo.db.medical_records.delete_one({'_id': ObjectId(patient_id)})
     
     # Redirect to the patient list page
