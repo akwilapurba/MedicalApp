@@ -36,6 +36,14 @@
 </nav>
 
 <div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <canvas id="genderChart" width="200" height="200"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="ageChart" width="200" height="200"></canvas>
+        </div>
+    </div>
     <h1 class="mt-5">Patient Information</h1>
     
     <!-- Navigation buttons -->
@@ -89,6 +97,7 @@
     <table class="table table-bordered">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Date of Birth</th>
                 <th>Gender</th>
@@ -102,6 +111,7 @@
         <tbody>
             {% for patient in patients %}
             <tr>
+                <td>{{ patient.patient_id }}</td>
                 <td>{{ patient.name }}</td>
                 <td>{{ patient.date_of_birth.strftime('%Y-%m-%d') }}</td>
                 <td>{{ patient.gender }}</td>
@@ -110,8 +120,8 @@
                 <td>{{ patient.allergies }}</td>
                 <td>{{ patient.last_appointment_date.strftime('%Y-%m-%d') }}</td>
                 <td>
-                    <a href="/edit/{{ patient._id }}" class="btn-sm btn-secondary">Edit</a>
-                    <a href="/delete/{{ patient._id }}" class="btn-sm btn-danger">Delete</a>
+                    <a href="/edit/{{ patient.patient_id }}" class="btn-sm btn-secondary">Edit</a>
+                    <a href="/delete/{{ patient.patient_id }}" class="btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
             {% endfor %}
@@ -133,7 +143,50 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<script>
+    var genderData = {{ gender_counts|safe }};
+    var ageData = {{ age_classification|safe }};
+
+    console.log("Gender Data:", genderData);
+    console.log("Age Data:", ageData);
+
+    // Gender Chart
+    var genderChart = new Chart(document.getElementById('genderChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(genderData),
+            datasets: [{
+                label: 'Gender Distribution',
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                data: Object.values(genderData)
+            }]
+        }
+    });
+
+    // Age Classification Chart
+    var ageChart = new Chart(document.getElementById('ageChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(ageData),
+            datasets: [{
+                label: 'Age Classification',
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                data: Object.values(ageData)
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
-
