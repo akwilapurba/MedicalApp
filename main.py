@@ -118,7 +118,7 @@ def index():
 
 
 # Define a route for the home page
-@app.route('/chatbot', methods=['GET', 'POST'])
+@app.route('/symptoms', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
@@ -127,7 +127,7 @@ def home():
         print(symptoms)
         if symptoms == "Symptoms":
             message = "Please either write symptoms or you have written misspelled symptoms"
-            return render_template('chatbot.html', message=message)
+            return render_template('symptoms.html', message=message)
         else:
 
             # Split the user's input into a list of symptoms (assuming they are comma-separated)
@@ -141,11 +141,11 @@ def home():
             for i in precautions[0]:
                 my_precautions.append(i)
 
-            return render_template('chatbot.html', predicted_disease=predicted_disease, dis_des=dis_des,
+            return render_template('symptoms.html', predicted_disease=predicted_disease, dis_des=dis_des,
                                    my_precautions=my_precautions, medications=medications, my_diet=rec_diet,
                                    workout=workout)
 
-    return render_template('chatbot.html')
+    return render_template('symptoms.html')
 
 
 # about view funtion and path
