@@ -36,6 +36,7 @@
 </nav>
 
 <div class="container">
+    {% if action == "list" %}
     <div class="row mt-5">
         <div class="col-md-6">
             <canvas id="genderChart" width="200" height="200"></canvas>
@@ -44,6 +45,7 @@
             <canvas id="ageChart" width="200" height="200"></canvas>
         </div>
     </div>
+    {% endif %}
     <h1 class="mt-5">Patient Information</h1>
     
     <!-- Navigation buttons -->
