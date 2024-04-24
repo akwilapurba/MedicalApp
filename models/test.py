@@ -1,7 +1,6 @@
 import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
-
 path = "models\jianghc\medical_chatbot"
 device = "cpu"
 tokenizer = GPT2Tokenizer.from_pretrained(path)
