@@ -689,7 +689,7 @@ body {
     font-family: Outfit;
     color: #01579b;
     text-align: left;
-    
+
 }
 .ask-helpful-ai:hover {
     color: #fff;
@@ -1070,7 +1070,7 @@ body {
     font-size: 20px;
     color: #303030;
 }
-.header {
+.navbar-lex {
     position: absolute;
     top: 34px;
     left: 61px;
@@ -1091,4 +1091,10 @@ body {
     font-size: 60px;
     color: #fff;
     font-family: Outfit;
+}
+
+#loading .spinner-border {
+    display: block !important;
+    width: 3rem;
+    height: 3rem;
 }

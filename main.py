@@ -1,31 +1,39 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, json
+from flask import Flask, request, render_template, redirect, url_for, flash, json, jsonify
 import numpy as np
 import pandas as pd
 import pickle
 from flask_pymongo import PyMongo
 from bson import ObjectId
 import datetime
+import torch
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 # flask app
 app = Flask(__name__)
 app.secret_key = 'final'
 
 # Configure MongoDB
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/Final_project'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/akwilakebo'
 
 # Initialize PyMongo with the app
 mongo = PyMongo(app)
 
-# load databasedataset
-sym_des = pd.read_csv ("datasets/symtoms_df.csv")
+# load database dataset
+sym_des = pd.read_csv("datasets/symtoms_df.csv")
 precautions = pd.read_csv("datasets/precautions_df.csv")
 workout = pd.read_csv("datasets/workout_df.csv")
 description = pd.read_csv("datasets/description.csv")
 medications = pd.read_csv('datasets/medications.csv')
 diets = pd.read_csv("datasets/diets.csv")
 
-# load model
-svc = pickle.load(open('models/svc.pkl', 'rb'))
+# load model symptoms
+svc = pickle.load(open("models/svc.pkl", "rb"))
+
+# load model chatbot
+path_chatbot = "models/medical_chatbot"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+tokenizer = GPT2Tokenizer.from_pretrained(path_chatbot)
+model = GPT2LMHeadModel.from_pretrained(path_chatbot, local_files_only=True).to(device)
 
 
 def calculate_age(date_of_birth):
@@ -114,12 +122,12 @@ def get_predicted_value(patient_symptoms):
 # creating routes
 @app.route("/")
 def index():
-    return render_template("index1.html")
+    return render_template("index.html")
 
 
 # Define a route for the home page
 @app.route('/symptoms', methods=['GET', 'POST'])
-def home():
+def symptom():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
         # mysysms = request.form.get('mysysms')
@@ -148,6 +156,36 @@ def home():
     return render_template('symptoms.html')
 
 
+# chatbot
+@app.route('/chatbot', methods=['GET', 'POST'])
+def chatbot():
+    if request.method == 'POST':
+        user_input = request.form.get('user_input')
+        prompt_input = (
+            "The conversation between human and AI assistant.\n"
+            "[|Human|] {input}\n"
+            "[|AI|]"
+        )
+        sentence = prompt_input.format_map({'input': user_input})
+        inputs = tokenizer(sentence, return_tensors="pt").to(device)
+
+        with torch.no_grad():
+            beam_output = model.generate(**inputs,
+                                         min_new_tokens=1,
+                                         max_length=512,
+                                         num_beams=3,
+                                         repetition_penalty=1.2,
+                                         early_stopping=True,
+                                         eos_token_id=198
+                                         )
+            full_response = tokenizer.decode(beam_output[0], skip_special_tokens=True)
+            # Extract only the answer part of the AI's response
+            response = full_response.split('[|AI|]')[-1].strip()
+            return render_template('chatbot.html', user_input=user_input, response=response)
+
+    return render_template('chatbot.html')
+
+
 # about view funtion and path
 @app.route('/information')
 def information():
@@ -158,7 +196,7 @@ def information():
     if action == 'create':
         return render_template('information.html', action='create')
     elif action == 'list':
-        all_patients_cursor = mongo.db.medical_records.find()
+        all_patients_cursor = mongo.db.kebo.find()
 
         all_patients = list(all_patients_cursor)
 
@@ -211,11 +249,11 @@ def information():
         print(age_classification_json)
 
         # Calculate the total number of patients and the total number of pages
-        total_patients = mongo.db.medical_records.count_documents({})
+        total_patients = mongo.db.kebo.count_documents({})
         total_pages = (total_patients + per_page - 1) // per_page
 
         # Fetch patients according to the current page and limit results
-        patients = mongo.db.medical_records.find().skip((page - 1) * per_page).limit(per_page)
+        patients = mongo.db.kebo.find().skip((page - 1) * per_page).limit(per_page)
 
         return render_template('information.html', action='list', patients=patients, total_pages=total_pages,
                                current_page=page, gender_counts=gender_counts_json,
@@ -224,6 +262,67 @@ def information():
         return render_template('information.html', action='search')
     else:
         return render_template("information.html")
+
+
+# Backend for get data gender and age for visualization return json
+@app.route('/data', methods=['GET'])
+def get_data():
+    all_patients_cursor = mongo.db.kebo.find()
+
+    all_patients = list(all_patients_cursor)
+
+    gender_counts = {"M": 0, "F": 0, "Other": 0}
+    for patient in all_patients:
+        gender_counts[patient["gender"]] += 1
+
+    gender_counts_json = json.dumps(gender_counts)
+
+    # Calculate the age of each patient
+    ages = [calculate_age(patient["date_of_birth"]) for patient in all_patients]
+
+    # Classify patients into age groups
+    age_classification = {
+        "0-10": 0,
+        "11-20": 0,
+        "21-30": 0,
+        "31-40": 0,
+        "41-50": 0,
+        "51-60": 0,
+        "61-70": 0,
+        "71-80": 0,
+        "81-90": 0,
+        "91-100": 0
+    }
+
+    for age in ages:
+        if age <= 10:
+            age_classification["0-10"] += 1
+        elif age <= 20:
+            age_classification["11-20"] += 1
+        elif age <= 30:
+            age_classification["21-30"] += 1
+        elif age <= 40:
+            age_classification["31-40"] += 1
+        elif age <= 50:
+            age_classification["41-50"] += 1
+        elif age <= 60:
+            age_classification["51-60"] += 1
+        elif age <= 70:
+            age_classification["61-70"] += 1
+        elif age <= 80:
+            age_classification["71-80"] += 1
+        elif age <= 90:
+            age_classification["81-90"] += 1
+        elif age <= 100:
+            age_classification["91-100"] += 1
+
+    age_classification_json = json.dumps(age_classification)
+    print(age_classification_json)
+
+    return jsonify({
+        'gender_counts': gender_counts,
+        'age_classification': age_classification
+    })
 
 
 @app.route('/search', methods=['GET'])
@@ -235,10 +334,10 @@ def search_patient():
     # Define the number of search results per page
     per_page = 50
 
-    # Perform a case-insensitive search for patients in the medical_records collection
+    # Perform a case-insensitive search for patients in the kebo collection
     # Query the collection based on the search query in the 'name' field
     # Calculate the total number of search results
-    total_patients = mongo.db.medical_records.count_documents({
+    total_patients = mongo.db.kebo.count_documents({
         'name': {'$regex': search_query, '$options': 'i'}
     })
 
@@ -246,7 +345,7 @@ def search_patient():
     total_pages = (total_patients + per_page - 1) // per_page
 
     # Fetch search results according to the current page and limit results
-    results = mongo.db.medical_records.find({
+    results = mongo.db.kebo.find({
         'name': {'$regex': search_query, '$options': 'i'}
     }).skip((page - 1) * per_page).limit(per_page)
 
@@ -284,8 +383,8 @@ def create_patient():
             'last_appointment_date': last_appointment_date
         }
 
-        # Insert the new patient record into the medical_records collection
-        mongo.db.medical_records.insert_one(new_patient)
+        # Insert the new patient record into the kebo collection
+        mongo.db.kebo.insert_one(new_patient)
 
         # Redirect to the patient list page
         flash('Patient added successfully.')
@@ -298,7 +397,7 @@ def create_patient():
 @app.route('/edit/<patient_id>', methods=['GET', 'POST'])
 def edit_patient(patient_id):
     # Query the patient from the database
-    patient = mongo.db.medical_records.find_one({'_id': ObjectId(patient_id)})
+    patient = mongo.db.kebo.find_one({'_id': ObjectId(patient_id)})
 
     if request.method == 'POST':
         # Get form data
@@ -315,7 +414,7 @@ def edit_patient(patient_id):
         last_appointment_date = datetime.datetime.strptime(last_appointment_date, '%Y-%m-%d')
 
         # Update the patient record
-        mongo.db.medical_records.update_one(
+        mongo.db.kebo.update_one(
             {'_id': ObjectId(patient_id)},
             {'$set': {
                 'name': name,
@@ -343,7 +442,7 @@ def edit_patient(patient_id):
 @app.route('/delete/<patient_id>')
 def delete_patient(patient_id):
     # Query the patient from the database
-    patient = mongo.db.medical_records.find_one({'_id': ObjectId(patient_id)})
+    patient = mongo.db.kebo.find_one({'_id': ObjectId(patient_id)})
 
     # Render a confirmation page before deletion
     return render_template('delete_confirmation.html', patient=patient)
@@ -351,8 +450,8 @@ def delete_patient(patient_id):
 
 @app.route('/confirm_delete/<patient_id>', methods=['POST'])
 def confirm_delete_patient(patient_id):
-    ## Delete the patient from the medical_records collection
-    mongo.db.medical_records.delete_one({'_id': ObjectId(patient_id)})
+    ## Delete the patient from the kebo collection
+    mongo.db.kebo.delete_one({'_id': ObjectId(patient_id)})
 
     # Redirect to the patient list page
     flash('Patient deleted successfully.')
