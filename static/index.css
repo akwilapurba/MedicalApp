@@ -412,11 +412,28 @@ body {
     width: 220px;
     height: 218px;
 }
+
+.descriptions:hover .rectangle17,
+.aids:hover .rectangle2,
+.pneumonia:hover .rectangle2,
+.allergy:hover .rectangle3,
+.cough:hover .rectangle2,
+.joint-pain:hover .rectangle3,
+.headache:hover .rectangle2,
+.cough2:hover .rectangle2,
+.anxiety:hover .rectangle3,
+.cramps:hover .rectangle2,
+.throat:hover .rectangle3 {
+    transform: translateY(-20px);
+    transition: 0.8s;
+}
+
 .keywords1 {
     width: 1246px;
     position: relative;
     height: 466px;
 }
+
 .here-are-some {
     width: 965px;
     position: relative;
@@ -565,39 +582,60 @@ body {
     z-index: 0;
 }
 .rectangle15 {
-    position: absolute;
-    top: 0px;
-    left: 0px;
+    width: 50px; /* Width of the anchor */
+    height: 50px; /* Height of the anchor */
+    border-radius: 32px; /* Rounded corners */
+    background-color: transparent; /* Transparent background */
+    text-decoration: none; /* No underline */
+}
+.rectangle15-container {
+    position: relative; /* Relative positioning */
+    background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent background */
+    border-radius: 32px; /* Rounded corners */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Light shadow */
+    width: 150px; /* Set width */
+    height: 50px; /* Set height */
+    display: flex; /* Flexbox for alignment */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+.rectangle15:hover {
+    background-color: rgba(255, 255, 255, 0.3); /* Change background on hover */
+}
+
+.rectangleRecords{
+    top: 225px;
+    left: 800px;
     border-radius: 28px;
     background-color: #fff;
     width: 365px;
     height: 56px;
-    transition: background-color 0.3s ease;
+    position: absolute; /* Relative positioning */
+    background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent background */
+    border-radius: 32px; /* Rounded corners */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Light shadow for depth */
+    display: flex; /* Flexbox for alignment */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    transition: background-color 0.3s ease; /* Transition for hover */   
 }
-.rectangle15:hover {
-    background-color: #01579b;
+.rectangleRecords:hover {
+    background-color: #5aee61;
 }
 
-.check-percentage {
-    position: absolute;
-    top: 16px;
-    left: 101px;
-    font-weight: 500;
-    color: #2e7d32;
-    transition: color 0.3s ease;
+.check {
+    font-size: 20px;
+    color: #fff; /* White text color */
+    font-size: 16px; /* Font size */
+    font-weight: 500; /* Font weight */
+    text-decoration: none; /* No underline */
+    text-align: center; /* Center the text */
 }
-.check-percentage:hover {
+.check:hover {
     color: #fff;
 }
-.group1 {
-    width: 365px;
-    position: absolute;
-    margin: 0 !important;
-    top: 218px;
-    left: 764px;
-    height: 56px;
-    z-index: 1;
-}
+
 .see-our-progress {
     width: 421px;
     position: absolute;
@@ -663,22 +701,27 @@ body {
 }
 
 .rectangleHAI{
-    position: absolute;
-    top: 114px;
-    left: 24px;
+    top: 120px;
+    left: 0px;
     border-radius: 28px;
     background-color: #fff;
     width: 365px;
     height: 56px;
-    transition: background-color 0.3s ease;
+    position: absolute; /* Relative positioning */
+    background-color: rgba(255, 255, 255, 0.15); /* Semi-transparent background */
+    border-radius: 32px; /* Rounded corners */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Light shadow for depth */
+    display: flex; /* Flexbox for alignment */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    transition: background-color 0.3s ease; /* Transition for hover */   
 }
-
 .rectangleHAI:hover {
-    background-color: #2e7d32;
+    background-color: #03a9f4;
 }
 
 .ask-helpful-ai {
-    position: absolute;
+    /* position: absolute;
     top: 130px;
     left: 130px;
     font-weight: 500;
@@ -688,8 +731,14 @@ body {
     width: 124px;
     font-family: Outfit;
     color: #01579b;
-    text-align: left;
-    
+    text-align: left; */
+
+    font-size: 20px;
+    color: #fff; /* White text color */
+    font-size: 16px; /* Font size */
+    font-weight: 500; /* Font weight */
+    text-decoration: none; /* No underline */
+    text-align: center; /* Center the text */
 }
 .ask-helpful-ai:hover {
     color: #fff;
@@ -916,6 +965,7 @@ body {
     display: inline-block;
     height: 141px;
     flex-shrink: 0;
+    top: 20px;
 }
 .find-book-apoinment {
     position: relative;
@@ -1016,59 +1066,65 @@ body {
     font-weight: 500;
 }
 .rectangle23 {
-    position: absolute;
-    top: 0px;
-    left: 583px;
-    border-radius: 32px;
-    background-color: #fff;
-    width: 141px;
-    height: 51.3px;
-    transition: background-color 0.3s ease;
+    position: absolute; /* Absolute position */
+    top: 0px; /* Align to the top */
+    left: 700px; /* Specific horizontal position */
+    border-radius: 32px; /* Rounded corners */
+    background-color: #fff; /* White background */
+    width: 141px; /* Set width */
+    height: 51.3px; /* Set height */
+    transition: background-color 0.3s ease; /* Smooth transition on hover */
+    display: flex; /* Flexbox to align content */
+    justify-content: center; /* Center the button text horizontally */
+    align-items: center; /* Center the button text vertically */
 }
 .rectangle23:hover {
     background-color: #01579b;
 }
 .search {
-    position: absolute;
     top: 13.45px;
     left: 625px;
-    font-weight: 500;
-    display: inline-block;
-    width: 87px;
-    height: 14.4px;
+    color: #000; /* Black text */
+    font-size: 18px; /* Font size */
+    text-decoration: none; /* No underline */
+    font-weight: 500; /* Font weight */
 }
 .rectangle24 {
-    position: absolute;
-    top: 0px;
-    left: calc(55% - 10px);
-    /* backdrop-filter: blur(29px); */
-    border-radius: 31.5px;
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.31);
-    box-sizing: border-box;
-    width: 564px;
-    height: 50.5px;
+    position: absolute; /* Absolute position */
+    top: 25px; /* Top alignment */
+    left: 880px; /* Horizontal position with relative offset */
+    border-radius: 31.5px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.15); /* Transparent white background */
+    border: 1px solid rgba(255, 255, 255, 0.31); /* Semi-transparent border */
+    width: 564px; /* Set width */
+    height: 50.5px; /* Set height */
+    box-sizing: border-box; /* Ensure consistent border-box model */
 }
 .search-disease-hospitals {
-    position: absolute;
-    top: 12px;
-    left: calc(50% - 250px);
-    font-size: 18px;
-    font-weight: 300;
-    color: #fff;
-    display: inline-block;
-    width: 280px;
-    height: 18.4px;
-    opacity: 0.6;
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.31);
+    position: absolute; /* Absolute position */
+    top: 12px; /* Vertical position within the container */
+    left: calc(50% - 250px); /* Horizontal position for alignment */
+    font-size: 18px; /* Font size */
+    font-weight: 300; /* Font weight */
+    color: white; /* White text color */
+    width: 280px; /* Set width */
+    height: 18.4px; /* Set height */
+    opacity: 0.6; /* Text opacity */
+    background: transparent; /* Transparent background for input */
+    border: 1px solid rgba(255, 255, 255, 0.31); /* Border style */
+    border-radius: 31.5px; /* Rounded corners for consistency */
+    outline: none; /* Remove default outline */
+    padding: 10px; /* Padding for comfort */
+    box-sizing: border-box; /* Ensure consistent sizing */
 }
+.search-disease-hospitals::placeholder {
+    color: white; /* Placeholder text color */
+    opacity: 0.6; /* Placeholder opacity */
+  }
 .search-bar {
-    width: 724px;
-    position: relative;
-    height: 51.3px;
-    font-size: 20px;
-    color: #303030;
+    position: relative; /* Allow absolute positioning for children */
+    width: 100%; /* Take the full width of the parent */
+    height: 51.3px; /* Set height */
 }
 .header {
     position: absolute;
@@ -1084,7 +1140,7 @@ body {
 .landing-page {
     width: 100%;
     position: relative;
-    background-color: #303030;
+    background-color: #111111;
     height: 6406px;
     overflow: hidden;
     text-align: left;
