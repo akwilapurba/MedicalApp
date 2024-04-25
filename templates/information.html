@@ -45,7 +45,6 @@
             <select name="gender" class="form-select" id="gender" required>
                 <option value="M">Male</option>
                 <option value="F">Female</option>
-                <option value="O">Other</option>
             </select>
         </div>
         <div class="mb-3">
@@ -96,8 +95,8 @@
                 <td>{{ patient.allergies }}</td>
                 <td>{{ patient.last_appointment_date.strftime('%Y-%m-%d') }}</td>
                 <td>
-                    <a href="/edit/{{ patient.patient_id }}" class="btn-sm btn-secondary">Edit</a>
-                    <a href="/delete/{{ patient.patient_id }}" class="btn-sm btn-danger">Delete</a>
+                    <a href="/edit/{{ patient._id }}" class="btn-sm btn-secondary">Edit</a>
+                    <a href="/delete/{{ patient._id }}" class="btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
             {% endfor %}
