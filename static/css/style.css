@@ -456,16 +456,11 @@ body {
 }
 .one-helpful-visualitation {
     position: absolute;
-    top: 0px;
-    left: calc(50% - 314.63px);
-    font-size: 64px;
-    line-height: 141.5%;
-    font-weight: 600;
-    font-family: 'Advent Pro';
-    text-align: left;
+    top: 85px;
+    left: calc(50% - 333.5px);
     display: inline-block;
-    width: 628px;
-    height: 85px;
+    width: 667px;
+    font-family: 'Advent Pro';
 }
 .visualitation-intro {
     width: 667px;
@@ -474,13 +469,13 @@ body {
 }
 .rectangle12 {
     position: absolute;
-    top: 0px;
+    top: 290px;
     left: 0px;
     border-radius: 40px;
     background-color: #fff;
     width: 803.6px;
     height: 748px;
-    opacity: 0.05;
+    opacity: 0.5;
 }
 .gender {
     position: absolute;
@@ -497,16 +492,6 @@ body {
     left: 0px;
     width: 803.6px;
     height: 748px;
-}
-.rectangle13 {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    border-radius: 40px;
-    background-color: #fff;
-    width: 743.1px;
-    height: 748px;
-    opacity: 0.05;
 }
 .age {
     position: absolute;
