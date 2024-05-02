@@ -5,9 +5,8 @@ import pickle
 from flask_pymongo import PyMongo
 from bson import ObjectId
 import datetime
-import os
-# import torch
-# from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 # flask app
 app = Flask(__name__)
@@ -31,11 +30,11 @@ diets = pd.read_csv("datasets/diets.csv")
 # load model symptoms
 svc = pickle.load(open("models/svc.pkl", "rb"))
 
-# # load model chatbot
-# path_chatbot = "models/medical_chatbot"
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# tokenizer = GPT2Tokenizer.from_pretrained(path_chatbot)
-# model = GPT2LMHeadModel.from_pretrained(path_chatbot, local_files_only=True).to(device)
+# load model chatbot
+path_chatbot = "models/medical_chatbot"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+tokenizer = GPT2Tokenizer.from_pretrained(path_chatbot)
+model = GPT2LMHeadModel.from_pretrained(path_chatbot, local_files_only=True).to(device)
 
 
 def calculate_age(date_of_birth):
@@ -158,34 +157,34 @@ def symptom():
     return render_template('symptoms.html')
 
 
-# # chatbot
-# @app.route('/chatbot', methods=['GET', 'POST'])
-# def chatbot():
-#     if request.method == 'POST':
-#         user_input = request.form.get('user_input')
-#         prompt_input = (
-#             "The conversation between human and AI assistant.\n"
-#             "[|Human|] {input}\n"
-#             "[|AI|]"
-#         )
-#         sentence = prompt_input.format_map({'input': user_input})
-#         inputs = tokenizer(sentence, return_tensors="pt").to(device)
+# chatbot
+@app.route('/chatbot', methods=['GET', 'POST'])
+def chatbot():
+    if request.method == 'POST':
+        user_input = request.form.get('user_input')
+        prompt_input = (
+            "The conversation between human and AI assistant.\n"
+            "[|Human|] {input}\n"
+            "[|AI|]"
+        )
+        sentence = prompt_input.format_map({'input': user_input})
+        inputs = tokenizer(sentence, return_tensors="pt").to(device)
 
-#         with torch.no_grad():
-#             beam_output = model.generate(**inputs,
-#                                          min_new_tokens=1,
-#                                          max_length=512,
-#                                          num_beams=3,
-#                                          repetition_penalty=1.2,
-#                                          early_stopping=True,
-#                                          eos_token_id=198
-#                                          )
-#             full_response = tokenizer.decode(beam_output[0], skip_special_tokens=True)
-#             # Extract only the answer part of the AI's response
-#             response = full_response.split('[|AI|]')[-1].strip()
-#             return render_template('chatbot.html', user_input=user_input, response=response)
+        with torch.no_grad():
+            beam_output = model.generate(**inputs,
+                                         min_new_tokens=1,
+                                         max_length=512,
+                                         num_beams=3,
+                                         repetition_penalty=1.2,
+                                         early_stopping=True,
+                                         eos_token_id=198
+                                         )
+            full_response = tokenizer.decode(beam_output[0], skip_special_tokens=True)
+            # Extract only the answer part of the AI's response
+            response = full_response.split('[|AI|]')[-1].strip()
+            return render_template('chatbot.html', user_input=user_input, response=response)
 
-#     return render_template('chatbot.html')
+    return render_template('chatbot.html')
 
 
 # about view funtion and path
