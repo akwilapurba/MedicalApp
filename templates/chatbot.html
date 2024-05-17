@@ -5,83 +5,92 @@
 {% endblock %}
 
 {% block style %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="{{url_for('static',filename='css/output.css')}}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <div class="chatbot-container">
-        <h1 class="chatbot-title">HAI the Helpful AI</h1>
-        <h4 class="chatbot-subtitle">Ask HAI your medical concerns, it will provide you with some solutions!</h4>
-        <div class="chat-history" id="chatHistory">
-            <!-- This will contain the conversation history -->
-        </div>
-        <form id="chatbotForm" action="/chatbot" method="post" class="chat-input-form">
-            <div class="input-group">
-                <input type="text" class="form-control" id="user_input" name="user_input" placeholder="Type your questions..." required>
-                <button type="submit" class="btn btn-primary">Send</button>
+    <div class="container">
+        <h1 class="mt-5">Chatbot</h1>
+        <div id="chat-interface" class="border rounded-lg overflow-hidden mt-5">
+            <div id="chat-container" class="p-3 space-y-3">
+                {% if user_input %}
+                    <div class="flex justify-end">
+                        <div class="bg-gray-200 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm">{{ user_input }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div id="loading" style="display: none;">
+                    <div class="flex justify-end">
+                        <div class="bg-gray-200 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm">Processing...</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if response %}
+                    <div class="flex justify-start">
+                        <div class="bg-blue-500 text-white rounded-lg p-3 max-w-xs">
+                            <p class="text-sm">{{ response }}</p>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-        </form>
-        <div id="loading" class="loading-spinner" style="display: none;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+
+            <form id="chatbotForm" action="/chatbot" method="post" class="p-3 bg-gray-100">
+                <div class="form-group">
+                    <label for="user_input">Enter your message:</label>
+                    <input type="text" class="form-control" id="user_input" name="user_input">
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Send</button>
+            </form>
         </div>
     </div>
 {% endblock %}
 
+
 {% block scripts %}
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> <!-- Use full version for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+
     <script>
         $(document).ready(function() {
-            $('#chatbotForm').on('submit', function(e) {
-                e.preventDefault(); // Prevent the form from submitting normally
+    $('#chatbotForm').on('submit', function(e) {
+        e.preventDefault(); // prevent the form from submitting normally
 
-                // Show the loading spinner
-                $('#loading').show();
+        // show the loading spinner
+        $('#loading').show();
 
-                // Get the form data
-                var formData = $(this).serialize();
+        // get the form data
+        var formData = $(this).serialize();
 
-                // Send the form data using fetch API
-                fetch('/chatbot', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData,
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Hide the loading spinner
-                    $('#loading').hide();
+        // send the form data using fetch API
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            // hide the loading spinner
+            $('#loading').hide();
 
-                    // Append the new conversation piece to the chat history
-                    $('#chatHistory').append(`
-                        <div class="chat-message">
-                            <strong>You:</strong> ${data.user_input}
-                        </div>
-                        <div class="chat-message">
-                            <strong>AI:</strong> ${data.response}
-                        </div>
-                    `);
-
-                    // Clear the input field
-                    $('#user_input').val('');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-
-                    // Hide the loading spinner
-                    $('#loading').hide();
-
-                    // Display error message
-                    $('#chatHistory').append(`
-                        <div class="chat-message error">
-                            <strong>Error:</strong> Something went wrong. Please try again.
-                        </div>
-                    `);
-                });
-            });
+            // update the chatbot response in the UI
+            // assuming the response data has a 'response' property
+            $('#chat-container').append(`
+                <div class="flex justify-start">
+                    <div class="bg-blue-500 text-white rounded-lg p-3 max-w-xs">
+                        <p class="text-sm">${data.response}</p>
+                    </div>
+                </div>
+            `);
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
+    });
+});
     </script>
 {% endblock %}

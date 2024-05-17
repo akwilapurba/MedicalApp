@@ -2,19 +2,22 @@ from flask import Flask, request, render_template, redirect, url_for, flash, jso
 import numpy as np
 import pandas as pd
 import pickle
+
+from flask_cors import CORS
 from flask_pymongo import PyMongo
 from bson import ObjectId
 import datetime
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import os
 
 # flask app
 app = Flask(__name__)
+
+CORS(app)
+
 app.secret_key = 'final'
 
-# Configure MongoDB
-mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/Final_project')
-app.config['MONGO_URI'] = mongo_uri
+# Configure MongoDB use root and password
+app.config['MONGO_URI'] = 'mongodb://mongodb.default.svc.cluster.local/abc'
 
 # Initialize PyMongo with the app
 mongo = PyMongo(app)
@@ -30,11 +33,12 @@ diets = pd.read_csv("datasets/diets.csv")
 # load model symptoms
 svc = pickle.load(open("models/svc.pkl", "rb"))
 
+
 # load model chatbot
-path_chatbot = "models/medical_chatbot"
-device = "cuda" if torch.cuda.is_available() else "cpu"
-tokenizer = GPT2Tokenizer.from_pretrained(path_chatbot)
-model = GPT2LMHeadModel.from_pretrained(path_chatbot, local_files_only=True).to(device)
+# path_chatbot = "models/medical_chatbot"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+# tokenizer = GPT2Tokenizer.from_pretrained(path_chatbot)
+# model = GPT2LMHeadModel.from_pretrained(path_chatbot, local_files_only=True).to(device)
 
 
 def calculate_age(date_of_birth):
@@ -158,33 +162,33 @@ def symptom():
 
 
 # chatbot
-@app.route('/chatbot', methods=['GET', 'POST'])
-def chatbot():
-    if request.method == 'POST':
-        user_input = request.form.get('user_input')
-        prompt_input = (
-            "The conversation between human and AI assistant.\n"
-            "[|Human|] {input}\n"
-            "[|AI|]"
-        )
-        sentence = prompt_input.format_map({'input': user_input})
-        inputs = tokenizer(sentence, return_tensors="pt").to(device)
-
-        with torch.no_grad():
-            beam_output = model.generate(**inputs,
-                                         min_new_tokens=1,
-                                         max_length=512,
-                                         num_beams=3,
-                                         repetition_penalty=1.2,
-                                         early_stopping=True,
-                                         eos_token_id=198
-                                         )
-            full_response = tokenizer.decode(beam_output[0], skip_special_tokens=True)
-            # Extract only the answer part of the AI's response
-            response = full_response.split('[|AI|]')[-1].strip()
-            return render_template('chatbot.html', user_input=user_input, response=response)
-
-    return render_template('chatbot.html')
+# @app.route('/chatbot', methods=['GET', 'POST'])
+# def chatbot():
+#     if request.method == 'POST':
+#         user_input = request.form.get('user_input')
+#         prompt_input = (
+#             "The conversation between human and AI assistant.\n"
+#             "[|Human|] {input}\n"
+#             "[|AI|]"
+#         )
+#         sentence = prompt_input.format_map({'input': user_input})
+#         inputs = tokenizer(sentence, return_tensors="pt").to(device)
+# 
+#         with torch.no_grad():
+#             beam_output = model.generate(**inputs,
+#                                          min_new_tokens=1,
+#                                          max_length=512,
+#                                          num_beams=3,
+#                                          repetition_penalty=1.2,
+#                                          early_stopping=True,
+#                                          eos_token_id=198
+#                                          )
+#             full_response = tokenizer.decode(beam_output[0], skip_special_tokens=True)
+#             # Extract only the answer part of the AI's response
+#             response = full_response.split('[|AI|]')[-1].strip()
+#             return render_template('chatbot.html', user_input=user_input, response=response)
+# 
+#     return render_template('chatbot.html')
 
 
 # about view funtion and path
@@ -197,7 +201,8 @@ def information():
     if action == 'create':
         return render_template('information.html', action='create')
     elif action == 'list':
-        all_patients_cursor = mongo.db.medical_records.find()
+        # Fetch all patients from the data collection
+        all_patients_cursor = mongo.db.data.find()
 
         all_patients = list(all_patients_cursor)
 
@@ -250,11 +255,11 @@ def information():
         print(age_classification_json)
 
         # Calculate the total number of patients and the total number of pages
-        total_patients = mongo.db.medical_records.count_documents({})
+        total_patients = mongo.db.data.count_documents({})
         total_pages = (total_patients + per_page - 1) // per_page
 
         # Fetch patients according to the current page and limit results
-        patients = mongo.db.medical_records.find().skip((page - 1) * per_page).limit(per_page)
+        patients = mongo.db.data.find().skip((page - 1) * per_page).limit(per_page)
 
         return render_template('information.html', action='list', patients=patients, total_pages=total_pages,
                                current_page=page, gender_counts=gender_counts_json,
@@ -268,7 +273,7 @@ def information():
 # Backend for get data gender and age for visualization return json
 @app.route('/data', methods=['GET'])
 def get_data():
-    all_patients_cursor = mongo.db.medical_records.find()
+    all_patients_cursor = mongo.db.data.find()
 
     all_patients = list(all_patients_cursor)
 
@@ -335,10 +340,10 @@ def search_patient():
     # Define the number of search results per page
     per_page = 50
 
-    # Perform a case-insensitive search for patients in the medical_records collection
+    # Perform a case-insensitive search for patients in the data collection
     # Query the collection based on the search query in the 'name' field
     # Calculate the total number of search results
-    total_patients = mongo.db.medical_records.count_documents({
+    total_patients = mongo.db.data.count_documents({
         'name': {'$regex': search_query, '$options': 'i'}
     })
 
@@ -346,7 +351,7 @@ def search_patient():
     total_pages = (total_patients + per_page - 1) // per_page
 
     # Fetch search results according to the current page and limit results
-    results = mongo.db.medical_records.find({
+    results = mongo.db.data.find({
         'name': {'$regex': search_query, '$options': 'i'}
     }).skip((page - 1) * per_page).limit(per_page)
 
@@ -384,8 +389,8 @@ def create_patient():
             'last_appointment_date': last_appointment_date
         }
 
-        # Insert the new patient record into the medical_records collection
-        mongo.db.medical_records.insert_one(new_patient)
+        # Insert the new patient record into the data collection
+        mongo.db.data.insert_one(new_patient)
 
         # Redirect to the patient list page
         flash('Patient added successfully.')
@@ -398,7 +403,7 @@ def create_patient():
 @app.route('/edit/<_id>', methods=['GET', 'POST'])
 def edit_patient(_id):
     # Query the patient from the database
-    patient = mongo.db.medical_records.find_one({'_id': ObjectId(_id)})
+    patient = mongo.db.data.find_one({'_id': ObjectId(_id)})
 
     if request.method == 'POST':
         # Get form data
@@ -415,7 +420,7 @@ def edit_patient(_id):
         last_appointment_date = datetime.datetime.strptime(last_appointment_date, '%Y-%m-%d')
 
         # Update the patient record
-        mongo.db.medical_records.update_one(
+        mongo.db.data.update_one(
             {'_id': ObjectId(_id)},
             {'$set': {
                 'name': name,
@@ -443,18 +448,20 @@ def edit_patient(_id):
 @app.route('/delete/<_id>')
 def delete_patient(_id):
     # Query the patient from the database
-    patient = mongo.db.medical_records.find_one({'_id': ObjectId(_id)})
+    patient = mongo.db.data.find_one({'_id': ObjectId(_id)})
 
     return render_template('delete_confirmation.html', patient=patient)
 
+
 @app.route('/confirm_delete/<_id>', methods=['POST'])
 def confirm_delete_patient(_id):
-    # Delete the patient record from the medical_records collection
-    mongo.db.medical_records.delete_one({'_id': ObjectId(_id)})
+    # Delete the patient record from the data collection
+    mongo.db.data.delete_one({'_id': ObjectId(_id)})
 
     # Redirect to the patient list page
     flash('Patient deleted successfully.')
     return redirect(url_for('information', action='list'))
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000)
