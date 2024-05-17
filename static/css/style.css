@@ -456,16 +456,11 @@ body {
 }
 .one-helpful-visualitation {
     position: absolute;
-    top: 0px;
-    left: calc(50% - 314.63px);
-    font-size: 64px;
-    line-height: 141.5%;
-    font-weight: 600;
-    font-family: 'Advent Pro';
-    text-align: left;
+    top: 85px;
+    left: calc(50% - 333.5px);
     display: inline-block;
-    width: 628px;
-    height: 85px;
+    width: 667px;
+    font-family: 'Advent Pro';
 }
 .visualitation-intro {
     width: 667px;
@@ -474,13 +469,13 @@ body {
 }
 .rectangle12 {
     position: absolute;
-    top: 300px;
+    top: 290px;
     left: 0px;
     border-radius: 40px;
     background-color: #fff;
     width: 803.6px;
     height: 748px;
-    
+    opacity: 0.5;
 }
 .gender {
     position: absolute;
@@ -497,16 +492,6 @@ body {
     left: 0px;
     width: 803.6px;
     height: 748px;
-}
-.rectangle13 {
-    position: absolute;
-    top: 300px;
-    left: 0px;
-    border-radius: 40px;
-    background-color: #fff;
-    width: 743.1px;
-    height: 748px;
-    
 }
 .age {
     position: absolute;
@@ -1097,72 +1082,4 @@ body {
     display: block !important;
     width: 3rem;
     height: 3rem;
-}
-
-.chatbot-container {
-    height: 517px;
-    width: 100%;
-    margin-top: 150px;
-    max-width: 600px;
-    margin-left: 600px;
-    padding: 15px;
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-}
-
-.chatbot-title {
-    text-align: center;
-    color: #333;
-    font-size: 30px;
-}
-
-.chatbot-subtitle {
-    text-align: center;
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 20px;
-}
-
-.chat-history {
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    background: white;
-    margin-bottom: 20px;
-    height: 300px;
-}
-
-.chat-message {
-    margin-bottom: 10px;
-}
-
-.chat-input-form {
-    margin-top: 10px;
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-}
-
-.input-group .form-control {
-    flex: 1;
-}
-
-.input-group .btn {
-    margin-left: 10px;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 10px;
-}
-
-.error {
-    color: red;
-    font-weight: bold;
 }
